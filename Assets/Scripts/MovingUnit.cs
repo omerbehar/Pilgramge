@@ -17,6 +17,8 @@ public class MovingUnit : HexUnit
     protected GameObject fogOfWarMask;
     protected GameObject fogOfWarMap;
     public GameObject dotBetweenStepsPreFab;
+    protected int movementPerTurn;
+    protected int movementLeftThisTurn;
 
     public GameObject mouse;
     // Start is called before the first frame update
@@ -101,14 +103,15 @@ public class MovingUnit : HexUnit
 
     public void NextMovement()
     {
+        int movementCost = 1; //change later to consider real cost
         //return if path empty
-        if (savedPath == null)
+        if (savedPath == null || movementLeftThisTurn < movementCost)
         {
             return;
         }
         //remove current position from path
         savedPath.RemoveAt(0);
-               
+        movementLeftThisTurn -= movementCost;
         //move to next position on path
         StartCoroutine("MoveUnit");
 
@@ -138,7 +141,7 @@ public class MovingUnit : HexUnit
             yield return new WaitForSeconds(Time.deltaTime);
         }
         mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(-1);
-
+        
         //if path has one node than after moving you reached target and can clear path
         if (savedPath.Count == 1)
         {
@@ -236,5 +239,10 @@ public class MovingUnit : HexUnit
                 child.parent = constantPath.transform;
             }
         }
+    }
+
+    internal void ResetMovementLeft()
+    {
+        movementLeftThisTurn = movementPerTurn;
     }
 }
