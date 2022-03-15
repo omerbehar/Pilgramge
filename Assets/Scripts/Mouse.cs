@@ -26,7 +26,8 @@ public class Mouse : MonoBehaviour
     public GameObject map;
     private bool isButtonHovered = false;
     RaycastHit2D[] raycastHit2D;
-
+    int isNextTurnActive = 0;
+    public Button nextTurnButton;
     // Start is called before the first frame update
     void Start()
     {
@@ -141,28 +142,22 @@ public class Mouse : MonoBehaviour
     {
         if (!clickedHex && !clickedUnit) //nothing is clicked
         {
-            //isHexClicked = true; //redundant
             clickedHex = collider2D;
             collider2D.GetComponent<HexUnit>().SelectUnit();
         }
         else if (clickedHex && clickedHex == collider2D) //unclicking a hex
         {
-            //isHexClicked = false; //redundant
             clickedHex = null;
             collider2D.GetComponent<HexUnit>().UnSelectUnit();
         }
         else if (clickedUnit) //setting a path
         {
-            //clickedUnit.GetComponent<MovingUnit>().isPathSet = true;
-            //clickedUnit.GetComponent<MovingUnit>().deleteTemporaryPath();
-            //map.GetComponent<MapCreator>().GeneratePathTo(collider2D.GetComponent<HexUnit>().tileX, collider2D.GetComponent<HexUnit>().tileY, clickedUnit.gameObject);
             clickedUnit.GetComponent<MovingUnit>().SetPath();
             lastHoveredHex = collider2D;
             collider2D.GetComponent<HexUnit>().UnHoverUnit();
-            clickedUnit.GetComponent<MovingUnit>().NextMovement(); //moves first step
+            
             clickedUnit.GetComponent<MovingUnit>().UnSelectUnitWithPath();
             clickedUnit = null;
-            //isUnitClicked = false; //redundant
         }
         else if (clickedHex && clickedHex != collider2D) // clicking a different hex while a hex is clicked
         {
@@ -392,15 +387,29 @@ public class Mouse : MonoBehaviour
 
     public void nextMoveButtonClicked()
     {
-        var allUnits = GameObject.FindObjectsOfType<MovingUnit>(); // GameObject.FindGameObjectsWithTag("unit");
+        var allUnits = GameObject.FindObjectsOfType<MovingUnit>();
         foreach (var unit in allUnits)
         {
             if (unit.GetComponent<MovingUnit>().isMenuOpen)
             {
                 unit.GetComponent<MovingUnit>().CloseMenu();
             }
+            clickedUnit = null;
             unit.GetComponent<MovingUnit>().NextMovement();
         }
+    }
+    public void UpdateIsNextTurnActive(int diff)
+    {
+        isNextTurnActive += diff;
+        if (isNextTurnActive > 0)
+        {
+            nextTurnButton.interactable = false;
+        } 
+        else
+        {
+            nextTurnButton.interactable = true;
+        }
+            
     }
 
     public void OnMouseEnterButton()

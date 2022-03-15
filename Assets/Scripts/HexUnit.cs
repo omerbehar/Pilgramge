@@ -94,18 +94,7 @@ public class HexUnit : MonoBehaviour
         {
             print("test");
             GetComponent<MovingUnit>().DeleteTemporaryPath();
-            GetComponent<MovingUnit>().currentPath.Clear();
-            for (int i = 0; i < GetComponent<MovingUnit>().savedPath.Count; i++)
-            {
-                GetComponent<MovingUnit>().currentPath.Add(GetComponent<MovingUnit>().savedPath[i]);
-            }
-            GetComponent<MovingUnit>().savedPath.Clear();
-            GetComponent<MovingUnit>().savedPath = null;
         }
-        //if(GetComponent<HexUnit>() && !GetComponent<MovingUnit>())
-        //{
-
-        //}
         isSelected = false;
         changeSpriteAlpha(1f);
     }

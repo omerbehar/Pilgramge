@@ -9,7 +9,7 @@ public class MovingUnit : HexUnit
     protected float speed = 2;
 
     public List<Node> currentPath = null;
-    public List<Node> savedPath = null;
+    protected List<Node> savedPath = null;
     protected LineRenderer temporaryPath;
     protected LineRenderer constantPath;
     protected LineRenderer setPath;
@@ -18,6 +18,7 @@ public class MovingUnit : HexUnit
     protected GameObject fogOfWarMap;
     public GameObject dotBetweenStepsPreFab;
 
+    public GameObject mouse;
     // Start is called before the first frame update
     protected void Start()
     {
@@ -31,6 +32,7 @@ public class MovingUnit : HexUnit
         temporaryPath.transform.parent = transform;
         constantPath = new GameObject("constantPath").AddComponent<LineRenderer>();
         constantPath.transform.parent = transform;
+    
     }
 
     // Update is called once per frame
@@ -74,16 +76,7 @@ public class MovingUnit : HexUnit
 
     public void createTemporaryPath()
     {
-        if (isPathSet && savedPath == null && currentPath != null)
-        {
-            savedPath = new List<Node>();
-            print(constantPath.positionCount);
-            for (int i = 0; i < currentPath.Count; i++)
-            {
-                savedPath.Add(currentPath[i]);
-            }
-            print(savedPath);
-        }
+
         DefinePaths();
         
         temporaryPath.positionCount = currentPath.Count;
@@ -109,12 +102,12 @@ public class MovingUnit : HexUnit
     public void NextMovement()
     {
         //return if path empty
-        if (currentPath == null)
+        if (savedPath == null)
         {
             return;
         }
         //remove current position from path
-        currentPath.RemoveAt(0);
+        savedPath.RemoveAt(0);
                
         //move to next position on path
         StartCoroutine("MoveUnit");
@@ -123,14 +116,15 @@ public class MovingUnit : HexUnit
         RemovePathPoints(constantPath, 1);
         
         //update unit position
-        tileX = currentPath[0].x;
-        tileY = currentPath[0].y;
+        tileX = savedPath[0].x;
+        tileY = savedPath[0].y;
         clearFogOfWar();
     }
     private IEnumerator MoveUnit()
     {
+        mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(1);
         //smooth movement
-        Vector2 dirVector = map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[0].x, currentPath[0].y) - transform.position;   
+        Vector2 dirVector = map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;   
         while (dirVector.magnitude > 0.01)
         {
             //unparent dots so they dont move with the unit
@@ -139,14 +133,16 @@ public class MovingUnit : HexUnit
             Vector2 veolcity = dirVector.normalized * speed * Time.deltaTime;
             veolcity = Vector2.ClampMagnitude(veolcity, dirVector.magnitude);
             transform.Translate(veolcity);
-            dirVector = map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[0].x, currentPath[0].y) - transform.position;
+            dirVector = map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;
             ParentDots(newDots);
             yield return new WaitForSeconds(Time.deltaTime);
         }
+        mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(-1);
+
         //if path has one node than after moving you reached target and can clear path
-        if (currentPath.Count == 1)
+        if (savedPath.Count == 1)
         {
-            currentPath = null;
+            savedPath = null;
             deleteConstantPath();
         }
     }
@@ -188,9 +184,12 @@ public class MovingUnit : HexUnit
     public void SetPath()
     {
         isPathSet = true;
+        savedPath = currentPath;
+        currentPath = null;
         deleteConstantPath();
         ClonePath();
         DeleteTemporaryPath();
+        NextMovement(); //moves first step
     }
 
    
