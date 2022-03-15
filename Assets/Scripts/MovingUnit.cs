@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovingUnit : HexUnit
+public class MovingUnit : Hex
 {
     public Vector3 destination;
     protected float speed = 2;
@@ -113,7 +113,7 @@ public class MovingUnit : HexUnit
         savedPath.RemoveAt(0);
         movementLeftThisTurn -= movementCost;
         //move to next position on path
-        StartCoroutine("MoveUnit");
+        StartCoroutine(MoveUnit());
 
         //clear moved path (now its one point only, can be easily changed to adjust for bigger movements)
         RemovePathPoints(constantPath, 1);

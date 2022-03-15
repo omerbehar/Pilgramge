@@ -8,128 +8,112 @@ using UnityEngine.UI;
 
 public class Mouse : MonoBehaviour
 {
-    RaycastHit2D hit;
-    Ray ray;
-    Collider2D lastHoveredHex;
-    Collider2D lastHoveredUnit;
-    int button;
-    Collider2D clickedHex;
-    Collider2D clickedUnit;
-    //bool isHexClicked = false;
-    //bool isUnitClicked = false;
-    float dist;
-    Vector3 mouseStart;
-    Vector3 mouseMove;
-    bool dragging;
-    public float scale = 0.2f;
-    Collider2D call2D;
-    public GameObject map;
-    private bool isButtonHovered = false;
-    RaycastHit2D[] raycastHit2D;
-    int isNextTurnActive = 0;
+    //float dist;
+    //Collider2D lastHoveredUnit;
+    //int button;
+    //RaycastHit2D hit;
+    //bool dragging;
+
+    //raycast
+    private Ray mouseLocateRay;//used to locate mouse on screen
+    private RaycastHit2D[] mouseHoveredRayCastResaults;
+
+    //drag
+    private Vector3 mouseDragNewPosition;
+    private Vector3 mouseDragStartPosition;
+
+    //marked colliders
+    private Collider2D frontHoveredCollider;//collider that is below the mouse
+    private Collider2D lastHoveredHex;
+    private Collider2D clickedHex;
+    private Collider2D clickedUnit;
+
+    //references
+    private MapCreator map;
+    [Space(2)]
+    //parameters
+    [Header("Parameter")]
+    [SerializeField] private float mapZoomMultiplier = 0.2f;
+
+
+    //button -- to move
+    private bool isButtonHovered = false;//marked if button hovered - used to not hover below objects
+    private int isNextTurnActive = 0;
     public Button nextTurnButton;
-    // Start is called before the first frame update
+
     void Start()
     {
-
+        InitializeReferences();
     }
 
-    // Update is called once per frame
+    private void InitializeReferences()
+    {
+        map = FindObjectOfType<MapCreator>();//get the map from the game
+    }
+
     void Update()
     {
-        HoverAndCLick();
+        CheckHoverAndCLick();
         DragMap();
         ZoomMap();
         ReleaseSelection();
     }
 
-    private void ReleaseSelection()
+    private void CheckHoverAndCLick()//checks if mouse is hovering over anything and triggers click input
     {
-        if (Input.GetMouseButtonDown(1))
+        mouseLocateRay = Camera.main.ScreenPointToRay(Input.mousePosition);//create ray using mouse position
+        mouseHoveredRayCastResaults = Physics2D.RaycastAll
+            (mouseLocateRay.origin, mouseLocateRay.direction, Mathf.Infinity);//gets collided things using mouse ray
+
+        //Button[] allButtons = FindObjectsOfType<Button>();//gets buttons to prevent clicking tiles below
+        //var allButtonTransforms = allButtons.Select(button => button.GetComponent<RectTransform>()).ToArray();
+        //var mouse2D = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+
+        if (mouseHoveredRayCastResaults.Length > 0)//check if something is hovered
         {
-            if (clickedHex)
+            // TODO: need to check if nost front collider is 0 in array
+            frontHoveredCollider = mouseHoveredRayCastResaults[0].collider;//set hovered collider
+        }
+        if (frontHoveredCollider && !isButtonHovered)//check if hovering over collider and not over button
+        {
+            MouseOverHex(frontHoveredCollider);
+            //TODO: move to input manager
+            if (Input.GetMouseButtonDown(0))//check if left click
             {
-                clickedHex.GetComponent<HexUnit>().UnSelectUnit();
-                clickedHex = null;
-                //isHexClicked = false;
-            }
-            if (clickedUnit)
-            {
-                clickedUnit.GetComponent<HexUnit>().UnSelectUnit();
-                clickedUnit = null;
-                //isUnitClicked = false;
+                if(frontHoveredCollider.GetComponent<Tile>() != null)//check if hex clicked
+                    MouseClickedHex(frontHoveredCollider);
+                else if(frontHoveredCollider.GetComponent<MovingUnit>() != null)//check if moving unit clicked
+                {
+                    MouseClickedUnit(frontHoveredCollider);
+                }
             }
         }
     }
-
-    private void HoverAndCLick()
+    void MouseOverHex(Collider2D collider2D)//functionallity of Hovering over Hex
     {
-        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        raycastHit2D = Physics2D.RaycastAll(ray.origin, ray.direction, Mathf.Infinity);
 
-        var allButtons = FindObjectsOfType<Button>();
-
-        var allButtonTransforms = allButtons.Select(button => button.GetComponent<RectTransform>()).ToArray();
-        var mouse2D = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-
-        if (raycastHit2D.Length > 0)
-        {
-            call2D = raycastHit2D[0].collider;
-        }
-        if (call2D && call2D.GetComponent<Hex>() != null && !isButtonHovered)
-        {
-            MouseOver_Hex(call2D);
-            if (Input.GetMouseButtonDown(0))
-            {
-                MouseClickedHex(call2D);
-            }
-        }
-        if (call2D && call2D.GetComponent<MovingUnit>() != null && !isButtonHovered)
-        {
-            MouseOver_Hex(call2D);
-            if (Input.GetMouseButtonDown(0))
-            {
-                MouseClickedUnit(call2D);
-            }
-        }
-    }
-
-    //void changeSpriteAlpha(Collider2D collider2D, float alpha)
-    //{
-    //    Color color = collider2D.GetComponent<SpriteRenderer>().color;
-    //    collider2D.GetComponent<SpriteRenderer>().color = new Color(color.r, color.g, color.b, alpha);
-    //}
-    
-    void MouseOver_Hex(Collider2D collider2D)
-    {
-       
         if ((!clickedHex && !clickedUnit) ||
             (clickedHex && collider2D.name != clickedHex.name) ||
             (clickedUnit && collider2D.name != clickedUnit.name)) //hex is clicked but we are pointing at a different hex
         {
             if (lastHoveredHex) //change previously hovered hex back to unhovered
             {
-                if (((clickedHex && clickedHex != lastHoveredHex)||!clickedHex) && ((clickedUnit && clickedUnit != lastHoveredHex) || !clickedUnit))
+                if (((clickedHex && clickedHex != lastHoveredHex) || !clickedHex) && ((clickedUnit && clickedUnit != lastHoveredHex) || !clickedUnit))
                 {
-                    lastHoveredHex.GetComponent<HexUnit>().UnHoverUnit();
+                    lastHoveredHex.GetComponent<Hex>().UnHoverUnit();
                 }
             }
             if (clickedUnit && collider2D.transform.tag != "unit") //hovering over a hex while unit clicked - creating a temporary path
             {
-                if (!clickedUnit.GetComponent<HexUnit>().isMenuOpen) //if menu is closed
+                if (!clickedUnit.GetComponent<Hex>().isMenuOpen) //if menu is closed
                 {
-                    map.GetComponent<MapCreator>().GeneratePathTo(collider2D.GetComponent<Hex>().tileX, collider2D.GetComponent<Hex>().tileY, clickedUnit.gameObject);
+                    map.GetComponent<MapCreator>().GeneratePathTo(collider2D.GetComponent<Tile>().tileX, collider2D.GetComponent<Tile>().tileY, clickedUnit.gameObject);
                     clickedUnit.GetComponent<MovingUnit>().createTemporaryPath();
                 }
-                //else //there is a path set
-                //{
-                //    map.GetComponent<MapCreator>().GeneratePathTo(collider2D.GetComponent<Hex>().tileX, collider2D.GetComponent<Hex>().tileY, clickedUnit.gameObject);
-                //    clickedUnit.GetComponent<MovingUnit>().createTemporaryPath();
-                //}
-            } 
+            }
             else
             {
-                collider2D.GetComponent<HexUnit>().HoverUnit();;
+                collider2D.GetComponent<Hex>().HoverUnit(); ;
                 lastHoveredHex = collider2D;
             }
         }
@@ -143,85 +127,53 @@ public class Mouse : MonoBehaviour
         if (!clickedHex && !clickedUnit) //nothing is clicked
         {
             clickedHex = collider2D;
-            collider2D.GetComponent<HexUnit>().SelectUnit();
+            collider2D.GetComponent<Hex>().SelectUnit();
         }
         else if (clickedHex && clickedHex == collider2D) //unclicking a hex
         {
             clickedHex = null;
-            collider2D.GetComponent<HexUnit>().UnSelectUnit();
+            collider2D.GetComponent<Hex>().UnSelectUnit();
         }
         else if (clickedUnit) //setting a path
         {
             clickedUnit.GetComponent<MovingUnit>().SetPath();
             lastHoveredHex = collider2D;
-            collider2D.GetComponent<HexUnit>().UnHoverUnit();
-            
+            collider2D.GetComponent<Hex>().UnHoverUnit();
+
             clickedUnit.GetComponent<MovingUnit>().UnSelectUnitWithPath();
             clickedUnit = null;
         }
         else if (clickedHex && clickedHex != collider2D) // clicking a different hex while a hex is clicked
         {
-            clickedHex.GetComponent<HexUnit>().UnSelectUnit();
-            collider2D.GetComponent<HexUnit>().SelectUnit();
+            clickedHex.GetComponent<Hex>().UnSelectUnit();
+            collider2D.GetComponent<Hex>().SelectUnit();
             clickedHex = collider2D;
         }
     }
+    private void ReleaseSelection()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (clickedHex)
+            {
+                clickedHex.GetComponent<Hex>().UnSelectUnit();
+                clickedHex = null;
+                //isHexClicked = false;
+            }
+            if (clickedUnit)
+            {
+                clickedUnit.GetComponent<Hex>().UnSelectUnit();
+                clickedUnit = null;
+                //isUnitClicked = false;
+            }
+        }
+    }
+
     
-    //void MouseClickedHex(Collider2D collider2D)
-    //{
-    //    //var collidersName = raycastHit2D.Select(collider => collider.collider.name).ToArray();
-    //    //Collider2D name = raycastHit2D.Where(collider => collider.collider.name == "buildCity").;
 
-    //    //int pos = Array.IndexOf(collidersName, value);
-
-    //    //if (raycastHit2D.Contains(collider2D => collider2D.collider.name == "");
-    //    //    {
-
-    //    //}
-    //    if (collider2D == clickedHex) //unclicking a hex
-    //    {
-    //        changeSpriteAlpha(collider2D, 1f);
-    //        isHexClicked = false;
-    //        clickedHex = null;
-    //    }
-    //    else if (isUnitClicked && !clickedUnit.GetComponent<MovingUnit>().isPathSet) //clicking a hex while a unit is clicked (sets unit's path)
-    //    {
-    //        clickedUnit.GetComponent<HexUnit>().CloseMenu();
-    //        clickedUnit.GetComponent<MovingUnit>().isPathSet = true;
-    //        clickedUnit.GetComponent<MovingUnit>().deleteTemporaryPath();
-    //        map.GetComponent<MapCreator>().GeneratePathTo(collider2D.GetComponent<Hex>().tileX, collider2D.GetComponent<Hex>().tileY, clickedUnit.gameObject);
-    //        clickedUnit.GetComponent<MovingUnit>().destination = collider2D.transform.position;
-    //        lastHoveredHex = collider2D;
-    //        changeSpriteAlpha(collider2D, 1f);
-    //        changeSpriteAlpha(clickedUnit, 1f);
-    //        clickedUnit.GetComponent<MovingUnit>().NextMovement(); //moves first step
-    //        clickedUnit = null;
-    //        isUnitClicked = false;
-    //    }
-    //    //else if (clickedUnit.GetComponent<PlayerControl>().isPathSet) //there is already a path set 
-    //    //{
-    //    //    clickedUnit.GetComponent<PlayerControl>().deleteConstantPath();
-    //    //    clickedUnit.GetComponent<PlayerControl>().isPathSet = false;
-    //    //    print(clickedUnit.GetComponent<PlayerControl>().isPathSet);
-    //    //    clickedUnit.GetComponent<PlayerControl>().deleteTemporaryPath();
-    //    //    map.GetComponent<MapCreator>().GeneratePathTo(collider2D.GetComponent<Hex>().tileX, collider2D.GetComponent<Hex>().tileY, clickedUnit.gameObject);
-    //    //    clickedUnit.GetComponent<PlayerControl>().destination = collider2D.transform.position;
-    //    //    lastHoveredHex = collider2D;
-    //    //    changeSpriteAlpha(collider2D, 1f);
-    //    //    Invoke("SetPathTrue", 0.1f); //inorder to make sure everything happens before the isPathSet changes to true
-    //    //}
-    //    else
-    //    {
-    //        if (clickedHex)
-    //        {
-    //            changeSpriteAlpha(clickedHex, 1f);
-    //        }
-    //        changeSpriteAlpha(collider2D, 0.2f);
-    //        isHexClicked = true;
-    //        clickedHex = collider2D;
-    //    }
-        
-    //}
+    
+    
+ 
     private void SetPathTrue()
     {
         clickedUnit.GetComponent<MovingUnit>().isPathSet = true;
@@ -240,16 +192,16 @@ public class Mouse : MonoBehaviour
         {
             if (clickedHex) //there is a clicked hex - unclick it
             {
-                clickedHex.GetComponent<HexUnit>().UnSelectUnit();
+                clickedHex.GetComponent<Hex>().UnSelectUnit();
                 clickedHex = null;
                 //isHexClicked = false; //redundant
             }
             print("test");
-            collider2D.GetComponent<HexUnit>().SelectUnit();
+            collider2D.GetComponent<Hex>().SelectUnit();
             //isUnitClicked = true; //redundent...
             clickedUnit = collider2D;
         } 
-        else if (collider2D == clickedUnit && !collider2D.GetComponent<HexUnit>().isMenuOpen) //clicked same unit while menu is closed - open menu
+        else if (collider2D == clickedUnit && !collider2D.GetComponent<Hex>().isMenuOpen) //clicked same unit while menu is closed - open menu
         {
             if (clickedUnit.GetComponent<MovingUnit>().isPathSet)
             {
@@ -259,92 +211,35 @@ public class Mouse : MonoBehaviour
             {
                 clickedUnit.GetComponent<MovingUnit>().UnSelectUnitWithOutPath();
             }
-            collider2D.GetComponent<HexUnit>().OpenMenu();
+            collider2D.GetComponent<Hex>().OpenMenu();
         }
-        else if (collider2D == clickedUnit && collider2D.GetComponent<HexUnit>().isMenuOpen) //clicked on a unit with an open menu - unclick unit
+        else if (collider2D == clickedUnit && collider2D.GetComponent<Hex>().isMenuOpen) //clicked on a unit with an open menu - unclick unit
         {
-            collider2D.GetComponent<HexUnit>().CloseMenu();
+            collider2D.GetComponent<Hex>().CloseMenu();
             //isUnitClicked = false; //redundent...
             clickedUnit = null;
         }
-        else if (collider2D != clickedUnit && !clickedUnit.GetComponent<HexUnit>().isMenuOpen) //clicked on a different unit while menu is closed
+        else if (collider2D != clickedUnit && !clickedUnit.GetComponent<Hex>().isMenuOpen) //clicked on a different unit while menu is closed
         {
-            clickedUnit.GetComponent<HexUnit>().UnSelectUnit();
-            collider2D.GetComponent<HexUnit>().SelectUnit();
+            clickedUnit.GetComponent<Hex>().UnSelectUnit();
+            collider2D.GetComponent<Hex>().SelectUnit();
             clickedUnit = collider2D;
         }
     }
-    //void MouseClickedUnit(Collider2D collider2D)
-    //{
-    //    if (collider2D.GetComponent<HexUnit>().isSelected && !collider2D.GetComponent<HexUnit>().isMenuOpen) //second click - open menu and close path
-    //    {
-    //        collider2D.GetComponent<HexUnit>().OpenMenu();
-    //        if (!clickedUnit.GetComponent<MovingUnit>().isPathSet)
-    //        {
-    //            clickedUnit.GetComponent<MovingUnit>().deleteTemporaryPath();
-    //            clickedUnit.GetComponent<MovingUnit>().Invoke("deleteConstantPath", 0.1f); //not working???
-    //        }
-    //        else
-    //        {
-    //            clickedUnit.GetComponent<MovingUnit>().deleteTemporaryPath();
-    //        }
-    //        isUnitClicked = false;
-    //        clickedUnit = null;
-    //    }
-    //    else if (collider2D.GetComponent<HexUnit>().isSelected && collider2D.GetComponent<HexUnit>().isMenuOpen) //unclicking a unit
-    //    {
-    //        clickedUnit.GetComponent<HexUnit>().CloseMenu();
-    //        changeSpriteAlpha(collider2D, 1f);
-    //        isUnitClicked = false;
-    //        clickedUnit = null;           
-    //    }
-    //    else if (!clickedUnit) //there is no clicked unit
-    //    {
-    //        collider2D.GetComponent<HexUnit>().isSelected = true;
-    //        if (!clickedHex) //there is also no clicked hex
-    //        {
-    //            changeSpriteAlpha(collider2D, 0.2f);
-    //            isUnitClicked = true;
-    //            clickedUnit = collider2D;
-    //            if (clickedUnit.GetComponent<MovingUnit>().isPathSet)
-    //            {
-    //                //clickedUnit.GetComponent<PlayerControl>().deleteTemporaryPath();
-    //                clickedUnit.GetComponent<MovingUnit>().deleteConstantPath();
-    //                clickedUnit.GetComponent<MovingUnit>().isPathSet = false;
-    //            }
-    //        }
-    //        else //there is a clicked hex
-    //        {
-    //            changeSpriteAlpha(collider2D, 0.2f);
-    //            isUnitClicked = true;
-    //            clickedUnit = collider2D;
-    //            isHexClicked = false;
-    //            changeSpriteAlpha(clickedHex, 1f);
-    //            clickedHex = null;
-    //        }
-    //    } 
-    //    else //clicked unit is different (change clicked unit)
-    //    {
-    //        //clickedUnit.GetComponent<HexUnit>().CloseMenu();
-    //        //collider2D.GetComponent<HexUnit>().OpenMenu();
-    //        changeSpriteAlpha(clickedUnit, 1f);
-    //        clickedUnit = collider2D;
-    //        changeSpriteAlpha(clickedUnit, 0.2f);
-    //    }
-    //}    
+    
     void DragMap()
     {
         //save mouse origin on drag
         if (Input.GetMouseButtonDown(1))
         {
-            mouseStart = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mouseDragStartPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
         //calculate difference between current mouse position and origin while mouse is dragging
         if (Input.GetMouseButton(1))
         {
-            mouseMove = mouseStart - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mouseDragNewPosition = mouseDragStartPosition - Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            Camera.main.transform.Translate(mouseMove);
+            Camera.main.transform.Translate(mouseDragNewPosition);
             Camera.main.transform.position = ClampCamera(Camera.main.transform.position);
         }
     }
@@ -365,7 +260,7 @@ public class Mouse : MonoBehaviour
     }
     void ZoomMap()
     {
-        float newZoom = Camera.main.orthographicSize - Input.mouseScrollDelta.y * scale;
+        float newZoom = Camera.main.orthographicSize - Input.mouseScrollDelta.y * mapZoomMultiplier;
         float maxZoomOut = Mathf.Min(6f, MaxZoomFromMapSize());
         Camera.main.orthographicSize = Mathf.Clamp(newZoom, 3.8f, maxZoomOut);
         Camera.main.transform.position = ClampCamera(Camera.main.transform.position);

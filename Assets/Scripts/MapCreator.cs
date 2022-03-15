@@ -75,8 +75,8 @@ public class MapCreator : MonoBehaviour
     {
         hex.transform.parent = transform;
         hex.name = "Hex_" + column.ToString() + "_" + row.ToString();
-        hex.GetComponent<Hex>().tileX = column;
-        hex.GetComponent<Hex>().tileY = row;
+        hex.GetComponent<Tile>().tileX = column;
+        hex.GetComponent<Tile>().tileY = row;
     }
 
     float CostToEnterTile(int x, int y)

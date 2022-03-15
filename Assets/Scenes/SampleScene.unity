@@ -258,6 +258,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 968617477}
     - target: {fileID: 3194395100369220540, guid: db9d0635741adac489c55b0751832d28, type: 3}
+      propertyPath: mouse
+      value: 
+      objectReference: {fileID: 1182687112}
+    - target: {fileID: 3194395100369220540, guid: db9d0635741adac489c55b0751832d28, type: 3}
       propertyPath: tileX
       value: 1
       objectReference: {fileID: 0}
@@ -1201,8 +1205,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 072cf149af6cbfc4eb6c7c52e23c407a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scale: 0.2
-  map: {fileID: 968617477}
+  mapZoomMultiplier: 0.2
+  nextTurnButton: {fileID: 0}
 --- !u!1 &1341195650
 GameObject:
   m_ObjectHideFlags: 0
@@ -13452,6 +13456,10 @@ PrefabInstance:
       propertyPath: map
       value: 
       objectReference: {fileID: 968617477}
+    - target: {fileID: 3194395100369220540, guid: db9d0635741adac489c55b0751832d28, type: 3}
+      propertyPath: mouse
+      value: 
+      objectReference: {fileID: 1182687112}
     - target: {fileID: 3194395100369220540, guid: db9d0635741adac489c55b0751832d28, type: 3}
       propertyPath: tileY
       value: 1
