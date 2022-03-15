@@ -13,6 +13,8 @@ public class Pilgrim : MovingUnit
         buildCityPrefab = Resources.Load<GameObject>("Prefabs/buildCityPrefab");
         cityPrefab = Resources.Load<GameObject>("Prefabs/cityPrefab");
         base.Start();
+        movementPerTurn = 1;
+        movementLeftThisTurn = movementPerTurn;
     }
 
     

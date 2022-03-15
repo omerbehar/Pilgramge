@@ -395,7 +395,9 @@ public class Mouse : MonoBehaviour
                 unit.GetComponent<MovingUnit>().CloseMenu();
             }
             clickedUnit = null;
+            unit.GetComponent<MovingUnit>().DeleteTemporaryPath();
             unit.GetComponent<MovingUnit>().NextMovement();
+            unit.GetComponent<MovingUnit>().ResetMovementLeft();
         }
     }
     public void UpdateIsNextTurnActive(int diff)
