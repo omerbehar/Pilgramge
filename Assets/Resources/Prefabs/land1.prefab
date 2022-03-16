@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2622185668497035127}
   - component: {fileID: 9069169224634746005}
   - component: {fileID: 2452007140696149467}
-  - component: {fileID: 4343841970500721206}
+  - component: {fileID: -5741820101435124152}
   m_Layer: 0
   m_Name: land1
   m_TagString: Untagged
@@ -121,7 +121,7 @@ PolygonCollider2D:
       - {x: 0.16, y: -0.53499997}
       - {x: 0.51, y: -0.325}
       - {x: 0.51, y: 0.33499998}
---- !u!114 &4343841970500721206
+--- !u!114 &-5741820101435124152
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -130,6 +130,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 171377937772251918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d34f86d4f28d8594f89630cab45bf36e, type: 3}
+  m_Script: {fileID: 11500000, guid: d5f208f612f98914e8041ca234953fcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  map: {fileID: 0}
+  tileX: 0
+  tileY: 0
+  isSelected: 0
+  isMenuOpen: 0
+  isHovered: 0
