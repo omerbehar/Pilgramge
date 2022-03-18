@@ -25,7 +25,7 @@ public class Pilgrim : MovingUnit
         base.Update();
     }
 
-    public override void  PopulateMenu() //sets the menu options
+    protected override void  PopulateMenu() //sets the menu options
     {
         
         menuOptionsPrefabs[0] = Instantiate(buildCityPrefab, menuCirclePrefab.transform);

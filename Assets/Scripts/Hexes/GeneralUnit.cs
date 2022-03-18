@@ -17,7 +17,7 @@ public  class GeneralUnit : Hex
         
     }
 
-    public virtual void PopulateMenu()//places menu options in place
+    protected virtual void PopulateMenu()//places menu options in place
     {
         if (menuOptionsPrefabs[0])
         {
