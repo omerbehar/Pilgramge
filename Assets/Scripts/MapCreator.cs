@@ -75,8 +75,7 @@ public class MapCreator : MonoBehaviour
     {
         hex.transform.parent = transform;
         hex.name = "Hex_" + column.ToString() + "_" + row.ToString();
-        hex.GetComponent<Tile>().tileX = column;
-        hex.GetComponent<Tile>().tileY = row;
+        hex.GetComponent<Tile>().SetTilePosotion(column,row);
     }
 
     float CostToEnterTile(int x, int y)
@@ -151,7 +150,7 @@ public class MapCreator : MonoBehaviour
         }
     }
 
-    public void GeneratePathTo(int x, int y, GameObject selectedUnit)
+    public void GeneratePathTo(Tile tile, GameObject selectedUnit)
     {
         //clear old path
         selectedUnit.GetComponent<MovingUnit>().currentPath = null;
@@ -161,8 +160,8 @@ public class MapCreator : MonoBehaviour
 
         //create list of nodes which we have'nt checked yet
         List<Node> unvisited = new List<Node>();
-        Node source = graph[selectedUnit.GetComponent<MovingUnit>().tileX, selectedUnit.GetComponent<MovingUnit>().tileY];
-        Node target = graph[x, y];
+        Node source = graph[(int)selectedUnit.GetComponent<MovingUnit>().GetTilePosition().x,(int)selectedUnit.GetComponent<MovingUnit>().GetTilePosition().y];
+        Node target = graph[(int)tile.GetTilePosition().x,(int) tile.GetTilePosition().y];
         dist[source] = 0;
         prev[source] = null;
 

@@ -25,21 +25,22 @@ public class Pilgrim : MovingUnit
         base.Update();
     }
 
-    public void PopulateMenu() //ask lior...
+    public override void  PopulateMenu() //sets the menu options
     {
-        menuOption[0] = Instantiate(buildCityPrefab, menu.transform);
-        menuOption[1] = Instantiate(buildCityPrefab, menu.transform);
-        menuOption[2] = Instantiate(buildCityPrefab, menu.transform);
-        menuOption[3] = Instantiate(buildCityPrefab, menu.transform);
-        menuOption[4] = Instantiate(buildCityPrefab, menu.transform);
-        menuOption[5] = Instantiate(buildCityPrefab, menu.transform);
+        
+        menuOptionsPrefabs[0] = Instantiate(buildCityPrefab, menuCirclePrefab.transform);
+        menuOptionsPrefabs[1] = Instantiate(buildCityPrefab, menuCirclePrefab.transform);
+        menuOptionsPrefabs[2] = Instantiate(buildCityPrefab, menuCirclePrefab.transform);
+        menuOptionsPrefabs[3] = Instantiate(buildCityPrefab, menuCirclePrefab.transform);
+        menuOptionsPrefabs[4] = Instantiate(buildCityPrefab, menuCirclePrefab.transform);
+        menuOptionsPrefabs[5] = Instantiate(buildCityPrefab, menuCirclePrefab.transform);
+        base.PopulateMenu();
     }
     public void BuildCity()
     {
         GameObject city = Instantiate(cityPrefab);
         city.transform.position = transform.position;
-        city.GetComponent<City>().tileX = GetComponent<Pilgrim>().tileX;
-        city.GetComponent<City>().tileY = GetComponent<Pilgrim>().tileY;
+        city.GetComponent<City>().SetTilePosotion (GetComponent<Pilgrim>().tileX, GetComponent<Pilgrim>().tileY);
         Destroy(this);
     }
 }

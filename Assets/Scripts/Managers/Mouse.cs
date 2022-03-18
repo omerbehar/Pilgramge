@@ -8,11 +8,6 @@ using UnityEngine.UI;
 
 public class Mouse : MonoBehaviour
 {
-    //float dist;
-    //Collider2D lastHoveredUnit;
-    //int button;
-    //RaycastHit2D hit;
-    //bool dragging;
 
     //raycast
     private Ray mouseLocateRay;//used to locate mouse on screen
@@ -29,6 +24,7 @@ public class Mouse : MonoBehaviour
     private Collider2D clickedUnit;
 
     //references
+    private TagMenager _tagMenager;
     private MapCreator map;
     [Space(2)]
     //parameters
@@ -49,12 +45,13 @@ public class Mouse : MonoBehaviour
     private void InitializeReferences()
     {
         map = FindObjectOfType<MapCreator>();//get the map from the game
+        _tagMenager = FindObjectOfType<TagMenager>();
     }
 
     void Update()
     {
         CheckHoverAndCLick();
-        DragMap();
+        PanMap();
         ZoomMap();
         ReleaseSelection();
     }
@@ -81,7 +78,7 @@ public class Mouse : MonoBehaviour
             if (Input.GetMouseButtonDown(0))//check if left click
             {
                 if(frontHoveredCollider.GetComponent<Tile>() != null)//check if hex clicked
-                    MouseClickedHex(frontHoveredCollider);
+                    MouseClickedTile(frontHoveredCollider);
                 else if(frontHoveredCollider.GetComponent<MovingUnit>() != null)//check if moving unit clicked
                 {
                     MouseClickedUnit(frontHoveredCollider);
@@ -96,25 +93,25 @@ public class Mouse : MonoBehaviour
             (clickedTile && hoveredCollider.name != clickedTile.name) ||
             (clickedUnit && hoveredCollider.name != clickedUnit.name)) //check if hovering over not clicked hex
         {
-            if (lastHoveredHex) //check if a hex is already hovered
+            if (lastHoveredHex) //check if a hex is already hovered - to unhover
             {
                 if (((clickedTile && clickedTile != lastHoveredHex) || !clickedTile) && 
                     ((clickedUnit && clickedUnit != lastHoveredHex) || !clickedUnit))//check if previous hovered hex is not clicked hex
                 {
-                    lastHoveredHex.GetComponent<Hex>().UnHoverUnit();
+                    lastHoveredHex.GetComponent<Hex>().UnHoverHex();
                 }
             }
-            if (clickedUnit && hoveredCollider.transform.tag != "unit") //hovering over a hex while unit clicked - creating a temporary path
+            if (clickedUnit && clickedUnit.GetComponent<MovingUnit>() && hoveredCollider.transform.tag != _tagMenager.UNIT_TAG) //hovering over a hex while unit clicked - creating a temporary path
             {
-                if (!clickedUnit.GetComponent<Hex>().isMenuOpen) //if menu is closed
+                if (!clickedUnit.GetComponent<GeneralUnit>().IsMenuOpen()) //if menu is closed - print temp path
                 {
-                    map.GetComponent<MapCreator>().GeneratePathTo(hoveredCollider.GetComponent<Tile>().tileX, hoveredCollider.GetComponent<Tile>().tileY, clickedUnit.gameObject);
+                    map.GetComponent<MapCreator>().GeneratePathTo(hoveredCollider.GetComponent<Tile>(), clickedUnit.gameObject);
                     clickedUnit.GetComponent<MovingUnit>().createTemporaryPath();
                 }
             }
-            else
+            else//if not print path then mark hoveret hex
             {
-                hoveredCollider.GetComponent<Hex>().HoverUnit(); ;
+                hoveredCollider.GetComponent<Hex>().HoverHex(); ;
                 lastHoveredHex = hoveredCollider;
             }
         }
@@ -123,115 +120,82 @@ public class Mouse : MonoBehaviour
             hoveredCollider.GetComponent<MovingUnit>().DeleteTemporaryPath();
         }
     }
-    void MouseClickedHex(Collider2D collider2D)
+    void MouseClickedTile(Collider2D clickedTileCollider)//function of clicking tile
     {
-        if (!clickedTile && !clickedUnit) //nothing is clicked
+        if (!clickedTile && !clickedUnit) //nothing is clicked - set clicked tile
         {
-            clickedTile = collider2D;
-            collider2D.GetComponent<Hex>().SelectUnit();
+            clickedTile = clickedTileCollider;
+            clickedTileCollider.GetComponent<Hex>().SelectHex();
         }
-        else if (clickedTile && clickedTile == collider2D) //unclicking a hex
+        else if (clickedTile && clickedTile == clickedTileCollider) //unclicking a tile
         {
             clickedTile = null;
-            collider2D.GetComponent<Hex>().UnSelectUnit();
+            clickedTileCollider.GetComponent<Hex>().UnSelect();
         }
         else if (clickedUnit) //setting a path
         {
-            clickedUnit.GetComponent<MovingUnit>().SetPath();
-            lastHoveredHex = collider2D;
-            collider2D.GetComponent<Hex>().UnHoverUnit();
-
-            clickedUnit.GetComponent<MovingUnit>().UnSelectUnitWithPath();
+            clickedUnit.GetComponent<MovingUnit>().SetPath();//set temp path to constant path
+            clickedUnit.GetComponent<MovingUnit>().UnSelect();
             clickedUnit = null;
         }
-        else if (clickedTile && clickedTile != collider2D) // clicking a different hex while a hex is clicked
+        else if (clickedTile && clickedTile != clickedTileCollider) // clicking a different tile while a tile is clicked
         {
-            clickedTile.GetComponent<Hex>().UnSelectUnit();
-            collider2D.GetComponent<Hex>().SelectUnit();
-            clickedTile = collider2D;
+            clickedTile.GetComponent<Hex>().UnSelect();
+            clickedTileCollider.GetComponent<Hex>().SelectHex();
+            clickedTile = clickedTileCollider;
         }
     }
-    private void ReleaseSelection()
-    {
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (clickedTile)
-            {
-                clickedTile.GetComponent<Hex>().UnSelectUnit();
-                clickedTile = null;
-                //isHexClicked = false;
-            }
-            if (clickedUnit)
-            {
-                clickedUnit.GetComponent<Hex>().UnSelectUnit();
-                clickedUnit = null;
-                //isUnitClicked = false;
-            }
-        }
-    }
-
-    
-
-    
-    
- 
-    private void SetPathTrue()
-    {
-        clickedUnit.GetComponent<MovingUnit>().isPathSet = true;
-        print(clickedUnit.name + " + " + clickedUnit.GetComponent<MovingUnit>().isPathSet);
-    }
-    private IEnumerator SetPathFalse()
-    {
-        clickedUnit.GetComponent<MovingUnit>().isPathSet = false;
-        print(clickedUnit.name + " _ " + clickedUnit.GetComponent<MovingUnit>().isPathSet);
-        yield return new WaitForSeconds(0.1f);
-    }
-
-    void MouseClickedUnit(Collider2D collider2D)
+    void MouseClickedUnit(Collider2D clickedUnitCollider)//function of clicking a unit
     {
         if (!clickedUnit) //no clicked unit - select unit
         {
-            if (clickedTile) //there is a clicked hex - unclick it
+            if (clickedTile) //there is a clicked tile - unclick it
             {
-                clickedTile.GetComponent<Hex>().UnSelectUnit();
+                clickedTile.GetComponent<Hex>().UnSelect();
                 clickedTile = null;
-                //isHexClicked = false; //redundant
             }
-            print("test");
-            collider2D.GetComponent<Hex>().SelectUnit();
-            //isUnitClicked = true; //redundent...
-            clickedUnit = collider2D;
-        } 
-        else if (collider2D == clickedUnit && !collider2D.GetComponent<Hex>().isMenuOpen) //clicked same unit while menu is closed - open menu
-        {
-            if (clickedUnit.GetComponent<MovingUnit>().isPathSet)
-            {
-                clickedUnit.GetComponent<MovingUnit>().UnSelectUnitWithPath();
-            }
-            else
-            {
-                clickedUnit.GetComponent<MovingUnit>().UnSelectUnitWithOutPath();
-            }
-            collider2D.GetComponent<Hex>().OpenMenu();
+            clickedUnitCollider.GetComponent<Hex>().SelectHex();
+            clickedUnit = clickedUnitCollider;
         }
-        else if (collider2D == clickedUnit && collider2D.GetComponent<Hex>().isMenuOpen) //clicked on a unit with an open menu - unclick unit
+        else if (clickedUnitCollider == clickedUnit) //clicked same unit 
         {
-            collider2D.GetComponent<Hex>().CloseMenu();
-            //isUnitClicked = false; //redundent...
-            clickedUnit = null;
+            if (!clickedUnitCollider.GetComponent<GeneralUnit>().IsMenuOpen()) //while menu is closed - open menu
+            {
+                clickedUnit.GetComponent<MovingUnit>().UnSelect();
+                clickedUnitCollider.GetComponent<GeneralUnit>().OpenMenu();
+            }
+            else//while menu is open - close menu
+            {
+                clickedUnitCollider.GetComponent<GeneralUnit>().CloseMenu();
+                clickedUnit = null;
+            }
         }
-        else if (collider2D != clickedUnit && !clickedUnit.GetComponent<Hex>().isMenuOpen) //clicked on a different unit while menu is closed
+        else if (clickedUnitCollider != clickedUnit && !clickedUnit.GetComponent<GeneralUnit>().IsMenuOpen()) //clicked on a different unit and not menu is open - click new unit
         {
-            clickedUnit.GetComponent<Hex>().UnSelectUnit();
-            collider2D.GetComponent<Hex>().SelectUnit();
-            clickedUnit = collider2D;
+            clickedUnit.GetComponent<MovingUnit>().UnSelect();
+            clickedUnitCollider.GetComponent<Hex>().SelectHex();
+            clickedUnit = clickedUnitCollider;
         }
     }
+
+
+    //private void SetPathTrue()
+    //{
+    //    clickedUnit.GetComponent<MovingUnit>().isPathSet = true;
+    //    print(clickedUnit.name + " + " + clickedUnit.GetComponent<MovingUnit>().isPathSet);
+    //}
+    //private IEnumerator SetPathFalse()
+    //{
+    //    clickedUnit.GetComponent<MovingUnit>().isPathSet = false;
+    //    print(clickedUnit.name + " _ " + clickedUnit.GetComponent<MovingUnit>().isPathSet);
+    //    yield return new WaitForSeconds(0.1f);
+    //}
+
     
-    void DragMap()
+    private void PanMap()
     {
-        //save mouse origin on drag
-        if (Input.GetMouseButtonDown(1))
+
+        if (Input.GetMouseButtonDown(1))//if right click mouse - save mouse origin position
         {
             mouseDragStartPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
@@ -240,11 +204,11 @@ public class Mouse : MonoBehaviour
         {
             mouseDragNewPosition = mouseDragStartPosition - Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-            Camera.main.transform.Translate(mouseDragNewPosition);
+            Camera.main.transform.Translate(mouseDragNewPosition);//move camera
             Camera.main.transform.position = ClampCamera(Camera.main.transform.position);
         }
     }
-    Vector3 ClampCamera(Vector3 targetPosition)
+    private Vector3 ClampCamera(Vector3 targetPosition)//check if new camera position is valid
     {
         float camHeight = Camera.main.orthographicSize;
         float camWidth = Camera.main.orthographicSize * Camera.main.aspect;
@@ -259,7 +223,7 @@ public class Mouse : MonoBehaviour
         float newY = Mathf.Clamp(targetPosition.y, minY, maxY);
         return new Vector3(newX, newY, targetPosition.z);
     }
-    void ZoomMap()
+    private void ZoomMap()//zooms the map
     {
         float newZoom = Camera.main.orthographicSize - Input.mouseScrollDelta.y * mapZoomMultiplier;
         float maxZoomOut = Mathf.Min(6f, MaxZoomFromMapSize());
@@ -267,7 +231,7 @@ public class Mouse : MonoBehaviour
         Camera.main.transform.position = ClampCamera(Camera.main.transform.position);
     }
 
-    private float MaxZoomFromMapSize() //fix later
+    private float MaxZoomFromMapSize() //calculate max zoom
     {
         if (MapCreator.mapHeight % 2 == 0)
         {
@@ -280,22 +244,26 @@ public class Mouse : MonoBehaviour
             return (((MapCreator.mapHeight - 1) / 2) * twoRowsHeight + MapCreator.yOffSet + MapCreator.xOffSet * Mathf.Sqrt(1f / 12f)) / 2;
         }
     }
-
-    public void nextMoveButtonClicked()
+    private void ReleaseSelection()//right click to unselect
     {
-        var allUnits = GameObject.FindObjectsOfType<MovingUnit>();
-        foreach (var unit in allUnits)
+        if (Input.GetMouseButtonDown(1))
         {
-            if (unit.GetComponent<MovingUnit>().isMenuOpen)
+            if (clickedTile)
             {
-                unit.GetComponent<MovingUnit>().CloseMenu();
+                clickedTile.GetComponent<Hex>().UnSelect();
+                clickedTile = null;
+                //isHexClicked = false;
             }
-            clickedUnit = null;
-            unit.GetComponent<MovingUnit>().DeleteTemporaryPath();
-            unit.GetComponent<MovingUnit>().NextMovement();
-            unit.GetComponent<MovingUnit>().ResetMovementLeft();
+            if (clickedUnit)
+            {
+                clickedUnit.GetComponent<Hex>().UnSelect();
+                clickedUnit = null;
+                //isUnitClicked = false;
+            }
         }
     }
+
+    //TODO: move to GUI manager
     public void UpdateIsNextTurnActive(int diff)
     {
         isNextTurnActive += diff;
@@ -309,7 +277,6 @@ public class Mouse : MonoBehaviour
         }
             
     }
-
     public void OnMouseEnterButton()
     {
         isButtonHovered = true;
@@ -317,6 +284,22 @@ public class Mouse : MonoBehaviour
     public void OnMouseExitButton()
     {
         isButtonHovered = false;
+    }
+    
+    public void nextMoveButtonClicked()//click on next turn button
+    {
+        var allUnits = GameObject.FindObjectsOfType<MovingUnit>();
+        foreach (var unit in allUnits)
+        {
+            if (unit.GetComponent<MovingUnit>().IsMenuOpen())
+            {
+                unit.GetComponent<MovingUnit>().CloseMenu();
+            }
+            clickedUnit = null;
+            unit.GetComponent<MovingUnit>().DeleteTemporaryPath();
+            unit.GetComponent<MovingUnit>().NextMovement();
+            unit.GetComponent<MovingUnit>().ResetMovementLeft();
+        }
     }
 }
 
