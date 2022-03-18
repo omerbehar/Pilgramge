@@ -1206,7 +1206,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapZoomMultiplier: 0.2
-  nextTurnButton: {fileID: 0}
+  nextTurnButton: {fileID: 833286230}
 --- !u!1 &1341195650
 GameObject:
   m_ObjectHideFlags: 0
