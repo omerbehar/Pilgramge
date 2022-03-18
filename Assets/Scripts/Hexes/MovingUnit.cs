@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MovingUnit : GeneralUnit
 {
-    public Vector3 destination;
+    protected Vector3 destination;
     protected float speed = 2;
 
     public List<Node> currentPath = null;

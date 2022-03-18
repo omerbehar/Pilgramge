@@ -5,15 +5,19 @@ using System.Linq;
 
 public class MapCreator : MonoBehaviour
 {
-    public TileType[] tileTypes;
-    int[,] tiles;
-    static Node[,] graph;
-    List<Node> currentPath = null;
+    //static
+    static Node[,] graph;//what is that?
     static public int mapWidth = 25;
     static public int mapHeight = 12; //minimum 9 rows for zoom to work correctly!!!
-    public GameObject hexTilePrefab;
     static public float xOffSet = 1f;
     static public float yOffSet = 0.88f;
+
+    //tiles
+    [SerializeField] private TileType[] tileTypes;//tile types
+    private int[,] tiles;//map tiles - a grid, contains the id of a tile type
+    //List<Node> currentPath = null;
+    [SerializeField] private GameObject hexTilePrefab;
+    
     void Start()
     {
         initializeTileTypes();
@@ -21,7 +25,7 @@ public class MapCreator : MonoBehaviour
         CreateHexTileMap();
     }
 
-    void initializeTileTypes()
+    void initializeTileTypes()//manually set the tile grid with tile types
     {
         tiles = new int[mapWidth, mapHeight];
         for (int x = 0; x < mapWidth; x++)
@@ -52,26 +56,26 @@ public class MapCreator : MonoBehaviour
         }
     }
 
-    void CreateHexTileMap()
+    void CreateHexTileMap()//instantiate the tiles
     {
         for (int x = 0; x < mapWidth; x++)
         {
             for (int y = 0; y < mapHeight; y++)
             {
-                GameObject hex = Instantiate(tileTypes[tiles[x, y]].tileVisualPreFab);
-                if (y % 2 == 0)
+                GameObject hex = Instantiate(tileTypes[tiles[x, y]].tileVisualPreFab);//instantiate new tile
+                if (y % 2 == 0)//set position with offsets
                 {
                     hex.transform.position = new Vector3(x * xOffSet, y * yOffSet, 0);
                 }
                 else
                 {
-                    hex.transform.position = new Vector3(x * xOffSet + xOffSet / 2, y * yOffSet, 0);
+                    hex.transform.position = new Vector3((x+0.5f) * xOffSet, y * yOffSet, 0);
                 }
                 SetTileInfo(hex, x, y);
             }
         }
     }
-    void SetTileInfo(GameObject hex, int column, int row)
+    void SetTileInfo(GameObject hex, int column, int row)//set the tile parent, positiob abd name
     {
         hex.transform.parent = transform;
         hex.name = "Hex_" + column.ToString() + "_" + row.ToString();
