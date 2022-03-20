@@ -5,18 +5,17 @@ using UnityEngine;
 
 public class MovingUnit : GeneralUnit
 {
-    protected Vector3 destination;
-    protected float speed = 2;
+    //protected float speed = 2;
 
-    public List<Node> currentPath = null;
-    protected List<Node> savedPath = null;
-    protected LineRenderer temporaryPath;
-    protected LineRenderer constantPath;
-    protected LineRenderer setPath;
+    public Path currentPath = null;
+    protected Path savedPath = null;
+    //protected LineRenderer temporaryPath;
+    //protected LineRenderer constantPath;
+    //protected LineRenderer setPath;
     public bool isPathSet = false;
     protected GameObject fogOfWarMask;
     protected GameObject fogOfWarMap;
-    public GameObject dotBetweenStepsPreFab;
+    //public GameObject dotBetweenStepsPreFab;
     protected int movementPerTurn;
     protected int movementLeftThisTurn;
 
@@ -29,11 +28,10 @@ public class MovingUnit : GeneralUnit
         fogOfWarMap = GameObject.Find("FogOfWarMap");
 
         clearFogOfWar();
-        destination = transform.position;
-        temporaryPath = new GameObject("temporaryPath").AddComponent<LineRenderer>();
-        temporaryPath.transform.parent = transform;
-        constantPath = new GameObject("constantPath").AddComponent<LineRenderer>();
-        constantPath.transform.parent = transform;
+        //temporaryPath = new GameObject("temporaryPath").AddComponent<LineRenderer>();
+        //temporaryPath.transform.parent = transform;
+        //constantPath = new GameObject("constantPath").AddComponent<LineRenderer>();
+        //constantPath.transform.parent = transform;
     
     }
 
@@ -43,7 +41,7 @@ public class MovingUnit : GeneralUnit
         base.Update();
         if (currentPath != null && !isPathSet)
         {
-            createTemporaryPath();
+            currentPath.DrawPath();
         }
     }
 
@@ -53,53 +51,53 @@ public class MovingUnit : GeneralUnit
         fogOfWarMask.transform.parent = fogOfWarMap.transform;
     }
 
-    private void DefinePaths()
-    {
-        if (temporaryPath)
-        {
-            temporaryPath.sortingLayerName = "TemporaryPath";
-            temporaryPath.startColor = Color.red;
-            temporaryPath.endColor = Color.red;
-            temporaryPath.startWidth = 0.03f;
-            temporaryPath.endWidth = 0.03f;
-            temporaryPath.useWorldSpace = true;
-            temporaryPath.material = new Material(Shader.Find("Sprites/Default"));
-        }
-        if (constantPath)
-        {
-            constantPath.startColor = Color.black;
-            constantPath.endColor = Color.black;
-            constantPath.startWidth = 0.03f;
-            constantPath.endWidth = 0.03f;
-            constantPath.useWorldSpace = true;
-            constantPath.material = new Material(Shader.Find("Sprites/Default"));
-        }
-    }
+    //private void DefinePaths()
+    //{
+    //    if (temporaryPath)
+    //    {
+    //        temporaryPath.sortingLayerName = "TemporaryPath";
+    //        temporaryPath.startColor = Color.red;
+    //        temporaryPath.endColor = Color.red;
+    //        temporaryPath.startWidth = 0.03f;
+    //        temporaryPath.endWidth = 0.03f;
+    //        temporaryPath.useWorldSpace = true;
+    //        temporaryPath.material = new Material(Shader.Find("Sprites/Default"));
+    //    }
+    //    if (constantPath)
+    //    {
+    //        constantPath.startColor = Color.black;
+    //        constantPath.endColor = Color.black;
+    //        constantPath.startWidth = 0.03f;
+    //        constantPath.endWidth = 0.03f;
+    //        constantPath.useWorldSpace = true;
+    //        constantPath.material = new Material(Shader.Find("Sprites/Default"));
+    //    }
+    //}
 
-    public void createTemporaryPath()
-    {
+    //public void createTemporaryPath()
+    //{
 
-        DefinePaths();
+    //    DefinePaths();
         
-        temporaryPath.positionCount = currentPath.Count;
-        foreach (Transform child in temporaryPath.transform)
-        {
-            GameObject.Destroy(child.gameObject);
-        }
-        int currentNode = 0;
-        while (currentNode < currentPath.Count - 1)
-        {
-            Vector3 currentLocation = _map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[currentNode].x, currentPath[currentNode].y);
-            Vector3 nextLocation = _map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[currentNode + 1].x, currentPath[currentNode + 1].y);
-            temporaryPath.SetPosition(currentNode, currentLocation);
-            temporaryPath.SetPosition(currentNode + 1, nextLocation);
-            GameObject dot = Instantiate(dotBetweenStepsPreFab);
-            dot.transform.position = nextLocation;
-            dot.transform.parent = temporaryPath.transform;
-            dot.name = transform.name + "_dot_" + currentNode;
-            currentNode++;
-        }
-    }
+    //    temporaryPath.positionCount = currentPath.Count;
+    //    foreach (Transform child in temporaryPath.transform)
+    //    {
+    //        GameObject.Destroy(child.gameObject);
+    //    }
+    //    int currentNode = 0;
+    //    while (currentNode < currentPath.Count - 1)
+    //    {
+    //        Vector3 currentLocation = _map.GetComponent<MapCreator>().hexToWorldCoord((int)currentPath[currentNode].GetTilePosition().x, (int)currentPath[currentNode].GetTilePosition().y);
+    //        Vector3 nextLocation = _map.GetComponent<MapCreator>().hexToWorldCoord((int)currentPath[currentNode+1].GetTilePosition().x, (int)currentPath[currentNode+1].GetTilePosition().y);
+    //        temporaryPath.SetPosition(currentNode, currentLocation);
+    //        temporaryPath.SetPosition(currentNode + 1, nextLocation);
+    //        GameObject dot = Instantiate(dotBetweenStepsPreFab);
+    //        dot.transform.position = nextLocation;
+    //        dot.transform.parent = temporaryPath.transform;
+    //        dot.name = transform.name + "_dot_" + currentNode;
+    //        currentNode++;
+    //    }
+    //}
 
     public void NextMovement()
     {
@@ -119,15 +117,15 @@ public class MovingUnit : GeneralUnit
         RemovePathPoints(constantPath, 1);
         
         //update unit position
-        tileX = savedPath[0].x;
-        tileY = savedPath[0].y;
+        tileX = (int)savedPath[0].GetTilePosition().x;
+        tileY = (int)savedPath[0].GetTilePosition().y;
         clearFogOfWar();
     }
     private IEnumerator MoveUnit()
     {
         mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(1);
         //smooth movement
-        Vector2 dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;   
+        Vector2 dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath[0].GetTilePosition().x, (int)savedPath[0].GetTilePosition().y) - transform.position;   
         while (dirVector.magnitude > 0.01)
         {
             //unparent dots so they dont move with the unit
@@ -136,7 +134,7 @@ public class MovingUnit : GeneralUnit
             Vector2 veolcity = dirVector.normalized * speed * Time.deltaTime;
             veolcity = Vector2.ClampMagnitude(veolcity, dirVector.magnitude);
             transform.Translate(veolcity);
-            dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;
+            dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath[0].GetTilePosition().x, (int)savedPath[0].GetTilePosition().y) - transform.position;
             ParentDots(newDots);
             yield return new WaitForSeconds(Time.deltaTime);
         }

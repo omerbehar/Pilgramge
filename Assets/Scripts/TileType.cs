@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
-public class TileType 
+[CreateAssetMenu(fileName = "TileType", menuName = "ScriptableObjects/TileType", order = 1)]
+public class TileType : ScriptableObject
 {
-    public string name;
-    public GameObject tileVisualPreFab;
-    public bool isWalkable = true;
-    public float costToEnter = 1;
+    //public string name;
+    //public GameObject tileVisualPreFab;
+    readonly public int ID;
+    readonly public Sprite tileImage;
+    readonly public bool isWalkable = true;
+    readonly public float costToEnter = 1;
 }

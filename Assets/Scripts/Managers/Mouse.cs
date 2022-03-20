@@ -105,7 +105,7 @@ public class Mouse : MonoBehaviour
             {
                 if (!clickedUnit.GetComponent<GeneralUnit>().IsMenuOpen()) //if menu is closed - print temp path
                 {
-                    map.GetComponent<MapCreator>().GeneratePathTo(hoveredCollider.GetComponent<Tile>(), clickedUnit.gameObject);
+                    map.GetComponent<MapCreator>().GeneratePathTo(hoveredCollider.GetComponent<Tile>(), clickedUnit.GetComponent<GeneralUnit>());
                     clickedUnit.GetComponent<MovingUnit>().createTemporaryPath();
                 }
             }
