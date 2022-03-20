@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3873197122378340186}
   - component: {fileID: 8787032943921502013}
-  - component: {fileID: 172749774811499825}
   - component: {fileID: 2619655331885110168}
+  - component: {fileID: 619931124711961012}
   m_Layer: 0
   m_Name: sea1
   m_TagString: Untagged
@@ -84,18 +84,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &172749774811499825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1445001282118529944}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d34f86d4f28d8594f89630cab45bf36e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!60 &2619655331885110168
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -133,3 +121,21 @@ PolygonCollider2D:
       - {x: 0.16, y: -0.53499997}
       - {x: 0.51, y: -0.325}
       - {x: 0.51, y: 0.33499998}
+--- !u!114 &619931124711961012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1445001282118529944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5f208f612f98914e8041ca234953fcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 0}
+  tileX: 0
+  tileY: 0
+  isSelected: 0
+  isMenuOpen: 0
+  isHovered: 0

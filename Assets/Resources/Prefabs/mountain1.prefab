@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6953408297846917103}
   - component: {fileID: 7696108859008235868}
-  - component: {fileID: -5696277547908678349}
   - component: {fileID: 3242667247629431802}
+  - component: {fileID: -8587660891582527903}
   m_Layer: 0
   m_Name: mountain1
   m_TagString: Untagged
@@ -84,18 +84,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-5696277547908678349
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6162484643859895173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d34f86d4f28d8594f89630cab45bf36e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!60 &3242667247629431802
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -133,3 +121,21 @@ PolygonCollider2D:
       - {x: 0.16, y: -0.53499997}
       - {x: 0.51, y: -0.325}
       - {x: 0.51, y: 0.33499998}
+--- !u!114 &-8587660891582527903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6162484643859895173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5f208f612f98914e8041ca234953fcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  map: {fileID: 0}
+  tileX: 0
+  tileY: 0
+  isSelected: 0
+  isMenuOpen: 0
+  isHovered: 0

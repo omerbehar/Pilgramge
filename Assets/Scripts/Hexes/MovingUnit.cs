@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovingUnit : HexUnit
+public class MovingUnit : GeneralUnit
 {
-    public Vector3 destination;
+    protected Vector3 destination;
     protected float speed = 2;
 
     public List<Node> currentPath = null;
@@ -89,8 +89,8 @@ public class MovingUnit : HexUnit
         int currentNode = 0;
         while (currentNode < currentPath.Count - 1)
         {
-            Vector3 currentLocation = map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[currentNode].x, currentPath[currentNode].y);
-            Vector3 nextLocation = map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[currentNode + 1].x, currentPath[currentNode + 1].y);
+            Vector3 currentLocation = _map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[currentNode].x, currentPath[currentNode].y);
+            Vector3 nextLocation = _map.GetComponent<MapCreator>().hexToWorldCoord(currentPath[currentNode + 1].x, currentPath[currentNode + 1].y);
             temporaryPath.SetPosition(currentNode, currentLocation);
             temporaryPath.SetPosition(currentNode + 1, nextLocation);
             GameObject dot = Instantiate(dotBetweenStepsPreFab);
@@ -113,7 +113,7 @@ public class MovingUnit : HexUnit
         savedPath.RemoveAt(0);
         movementLeftThisTurn -= movementCost;
         //move to next position on path
-        StartCoroutine("MoveUnit");
+        StartCoroutine(MoveUnit());
 
         //clear moved path (now its one point only, can be easily changed to adjust for bigger movements)
         RemovePathPoints(constantPath, 1);
@@ -127,7 +127,7 @@ public class MovingUnit : HexUnit
     {
         mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(1);
         //smooth movement
-        Vector2 dirVector = map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;   
+        Vector2 dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;   
         while (dirVector.magnitude > 0.01)
         {
             //unparent dots so they dont move with the unit
@@ -136,7 +136,7 @@ public class MovingUnit : HexUnit
             Vector2 veolcity = dirVector.normalized * speed * Time.deltaTime;
             veolcity = Vector2.ClampMagnitude(veolcity, dirVector.magnitude);
             transform.Translate(veolcity);
-            dirVector = map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;
+            dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord(savedPath[0].x, savedPath[0].y) - transform.position;
             ParentDots(newDots);
             yield return new WaitForSeconds(Time.deltaTime);
         }
@@ -214,16 +214,14 @@ public class MovingUnit : HexUnit
         }
         temporaryPath.positionCount = 0;
     }
-    public void UnSelectUnitWithOutPath()
+    public void UnSelect()//override unselect + remove temp path
     {
-        currentPath = null;
-        isSelected = false;
-        changeSpriteAlpha(1f);
-    }
-    public void UnSelectUnitWithPath()
-    {
-        isSelected = false;
-        changeSpriteAlpha(1f);
+        base.UnSelect();
+        if (!isPathSet)
+        {
+            currentPath = null;
+        }
+        DeleteTemporaryPath();
     }
     void ClonePath()
     {
