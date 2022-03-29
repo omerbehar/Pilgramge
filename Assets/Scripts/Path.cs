@@ -96,6 +96,29 @@ public class Path
     {
         RemovePathPoints(1);
     }
+    public void DeletePath()
+    {
+        foreach (Transform child in renderedPath.transform)
+        {
+            MonoBehaviour.Destroy(child.gameObject);
+        }
+        renderedPath.positionCount = 0;
+    }
+    void ClonePath(LineRenderer constantPath)
+    {
+        Vector3[] positions = new Vector3[temporaryPath.positionCount];
+        constantPath.positionCount = temporaryPath.positionCount;
+        temporaryPath.GetPositions(positions);
+        constantPath.SetPositions(positions);
+        Transform[] indices = temporaryPath.GetComponentsInChildren<Transform>();
+        foreach (Transform child in indices)
+        {
+            if (!child.GetComponent<LineRenderer>())
+            {
+                child.parent = constantPath.transform;
+            }
+        }
+    }
 
     //private void MakePathConstant()
     //{

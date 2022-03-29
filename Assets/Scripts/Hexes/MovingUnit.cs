@@ -187,31 +187,31 @@ public class MovingUnit : GeneralUnit
         isPathSet = true;
         savedPath = currentPath;
         currentPath = null;
-        deleteConstantPath();
+        savedPath.DeletePath(); ;
         ClonePath();
-        DeleteTemporaryPath();
+        currentPath.DeletePath();
         NextMovement(); //moves first step
     }
 
    
 
-    public void deleteConstantPath()
-    {
-        foreach (Transform child in constantPath.transform)
-        {
-            Destroy(child.gameObject);
-        }
-        constantPath.positionCount = 0;
-    }
+    //public void deleteConstantPath()
+    //{
+    //    foreach (Transform child in constantPath.transform)
+    //    {
+    //        Destroy(child.gameObject);
+    //    }
+    //    constantPath.positionCount = 0;
+    //}
 
-    public void DeleteTemporaryPath()
-    {
-        foreach (Transform child in temporaryPath.transform)
-        {
-            Destroy(child.gameObject);
-        }
-        temporaryPath.positionCount = 0;
-    }
+    //public void DeleteTemporaryPath()
+    //{
+    //    foreach (Transform child in temporaryPath.transform)
+    //    {
+    //        Destroy(child.gameObject);
+    //    }
+    //    temporaryPath.positionCount = 0;
+    //}
     public void UnSelect()//override unselect + remove temp path
     {
         base.UnSelect();
@@ -219,7 +219,7 @@ public class MovingUnit : GeneralUnit
         {
             currentPath = null;
         }
-        DeleteTemporaryPath();
+        currentPath.DeletePath();
     }
     void ClonePath()
     {
