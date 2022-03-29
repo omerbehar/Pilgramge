@@ -7,7 +7,7 @@ public class Path
 {
 
     private float speed = 2;
-    private List<Tile> tilesInPath;
+    public List<Tile> tilesInPath;
     private LineRenderer renderedPath;
     //private LineRenderer constantPath;
     private LineRenderer setPath;
@@ -58,6 +58,45 @@ public class Path
             currentTile++;
         }
     }
+    private Transform[] UnparentDots(Transform[] dots)
+    {
+        Transform[] newDots = new Transform[dots.Length];
+        for (int i = 1; i < dots.Length; i++)
+        {
+            dots[i].parent = dots[i].parent.parent.parent;
+            newDots[i] = dots[i];
+        }
+        return newDots;
+    }
+    private void ParentDots(Transform[] newDots)
+    {
+        for (int i = 1; i < newDots.Length; i++)
+        {
+            newDots[i].parent = renderedPath.transform;
+        }
+    }
+    private void RemovePathPoints(int pointsToRemove)
+    {
+        Vector3[] positions = new Vector3[renderedPath.positionCount];
+        Vector3[] newPositions = new Vector3[renderedPath.positionCount - pointsToRemove];
+        renderedPath.GetPositions(positions);
+        for (int i = 0; i < renderedPath.positionCount - pointsToRemove; i++)
+        {
+            newPositions[i] = positions[i + pointsToRemove];
+        }
+        renderedPath.SetPositions(newPositions);
+        Transform[] dots = renderedPath.GetComponentsInChildren<Transform>();
+        if (dots.Length > 1)
+        {
+            MonoBehaviour.Destroy(dots[1].gameObject);
+        }
+    }
+
+    internal void NextMove(int v)
+    {
+        RemovePathPoints(1);
+    }
+
     //private void MakePathConstant()
     //{
     //    constantPath.startColor = Color.black;
@@ -66,7 +105,8 @@ public class Path
     //    constantPath.endWidth = 0.03f;
     //    constantPath.useWorldSpace = true;
     //    constantPath.material = new Material(Shader.Find("Sprites/Default"));
-        
+
     //}
+    //get and set
 }
 

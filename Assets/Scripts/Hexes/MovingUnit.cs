@@ -108,17 +108,17 @@ public class MovingUnit : GeneralUnit
             return;
         }
         //remove current position from path
-        savedPath.RemoveAt(0);
+        savedPath.tilesInPath.RemoveAt(0);
         movementLeftThisTurn -= movementCost;
         //move to next position on path
         StartCoroutine(MoveUnit());
 
         //clear moved path (now its one point only, can be easily changed to adjust for bigger movements)
-        RemovePathPoints(constantPath, 1);
-        
+        //RemovePathPoints(constantPath, 1);
+        savedPath.NextMove(1);
         //update unit position
-        tileX = (int)savedPath[0].GetTilePosition().x;
-        tileY = (int)savedPath[0].GetTilePosition().y;
+        tileX = (int)savedPath.tilesInPath[0].GetTilePosition().x;
+        tileY = (int)savedPath.tilesInPath[0].GetTilePosition().y;
         clearFogOfWar();
     }
     private IEnumerator MoveUnit()
@@ -148,39 +148,39 @@ public class MovingUnit : GeneralUnit
         }
     }
 
-    private Transform[] UnparentDots(Transform[] dots)
-    {
-        Transform[] newDots = new Transform[dots.Length];
-        for (int i = 1; i < dots.Length; i++)
-        {
-            dots[i].parent = dots[i].parent.parent.parent;
-            newDots[i] = dots[i];
-        }
-        return newDots;
-    }
-    private void ParentDots(Transform[] newDots)
-    {
-        for (int i = 1; i < newDots.Length; i++)
-        {
-            newDots[i].parent = constantPath.transform;
-        }
-    }
-    private void RemovePathPoints(LineRenderer path, int pointsToRemove)
-    {
-        Vector3[] positions = new Vector3[path.positionCount];
-        Vector3[] newPositions = new Vector3[path.positionCount - pointsToRemove];
-        path.GetPositions(positions);
-        for (int i = 0; i < path.positionCount - pointsToRemove; i++)
-        {
-            newPositions[i] = positions[i + pointsToRemove];
-        }
-        path.SetPositions(newPositions);
-        Transform[] dots = path.GetComponentsInChildren<Transform>();
-        if (dots.Length > 1)
-        {
-            Destroy(dots[1].gameObject);
-        }
-    }
+    //private Transform[] UnparentDots(Transform[] dots)
+    //{
+    //    Transform[] newDots = new Transform[dots.Length];
+    //    for (int i = 1; i < dots.Length; i++)
+    //    {
+    //        dots[i].parent = dots[i].parent.parent.parent;
+    //        newDots[i] = dots[i];
+    //    }
+    //    return newDots;
+    //}
+    //private void ParentDots(Transform[] newDots)
+    //{
+    //    for (int i = 1; i < newDots.Length; i++)
+    //    {
+    //        newDots[i].parent = constantPath.transform;
+    //    }
+    //}
+    //private void RemovePathPoints(LineRenderer path, int pointsToRemove)
+    //{
+    //    Vector3[] positions = new Vector3[path.positionCount];
+    //    Vector3[] newPositions = new Vector3[path.positionCount - pointsToRemove];
+    //    path.GetPositions(positions);
+    //    for (int i = 0; i < path.positionCount - pointsToRemove; i++)
+    //    {
+    //        newPositions[i] = positions[i + pointsToRemove];
+    //    }
+    //    path.SetPositions(newPositions);
+    //    Transform[] dots = path.GetComponentsInChildren<Transform>();
+    //    if (dots.Length > 1)
+    //    {
+    //        Destroy(dots[1].gameObject);
+    //    }
+    //}
 
     public void SetPath()
     {
