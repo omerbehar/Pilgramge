@@ -125,7 +125,7 @@ public class MovingUnit : GeneralUnit
     {
         mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(1);
         //smooth movement
-        Vector2 dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath[0].GetTilePosition().x, (int)savedPath[0].GetTilePosition().y) - transform.position;   
+        Vector2 dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath.tilesInPath[0].GetTilePosition().x, (int)savedPath.tilesInPath[0].GetTilePosition().y) - transform.position;   
         while (dirVector.magnitude > 0.01)
         {
             //unparent dots so they dont move with the unit
