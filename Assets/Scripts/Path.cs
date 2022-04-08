@@ -8,9 +8,9 @@ public class Path
 
     private float speed = 2;
     public List<Tile> tilesInPath;
-    private LineRenderer renderedPath;
+    public LineRenderer renderedPath;//displayed path
     //private LineRenderer constantPath;
-    private LineRenderer setPath;
+    //private LineRenderer setPath;
 
     //references
     private GameObject _dotBetweenStepsPreFab;
@@ -106,11 +106,11 @@ public class Path
     }
     void ClonePath(LineRenderer constantPath)
     {
-        Vector3[] positions = new Vector3[temporaryPath.positionCount];
-        constantPath.positionCount = temporaryPath.positionCount;
-        temporaryPath.GetPositions(positions);
+        Vector3[] positions = new Vector3[renderedPath.positionCount];
+        constantPath.positionCount = renderedPath.positionCount;
+        renderedPath.GetPositions(positions);
         constantPath.SetPositions(positions);
-        Transform[] indices = temporaryPath.GetComponentsInChildren<Transform>();
+        Transform[] indices = renderedPath.GetComponentsInChildren<Transform>();
         foreach (Transform child in indices)
         {
             if (!child.GetComponent<LineRenderer>())
@@ -119,7 +119,12 @@ public class Path
             }
         }
     }
-
+    public void MoveUnit()
+    {
+        Transform[] dots = renderedPath.GetComponentsInChildren<Transform>();
+        Transform[] newDots = UnparentDots(dots);
+        ParentDots(newDots);
+    }
     //private void MakePathConstant()
     //{
     //    constantPath.startColor = Color.black;
@@ -131,5 +136,13 @@ public class Path
 
     //}
     //get and set
+    public int GetPathPositionCount()
+    {
+        return renderedPath.positionCount;
+    }
+    public void SetPathPositionCount(int positionCount)
+    {
+        renderedPath.positionCount = positionCount;
+    }
 }
 

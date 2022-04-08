@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MovingUnit : GeneralUnit
 {
-    //protected float speed = 2;
+    protected float speed = 2;
 
     public Path currentPath = null;
     protected Path savedPath = null;
@@ -129,22 +129,21 @@ public class MovingUnit : GeneralUnit
         while (dirVector.magnitude > 0.01)
         {
             //unparent dots so they dont move with the unit
-            Transform[] dots = constantPath.GetComponentsInChildren<Transform>();
-            Transform[] newDots = UnparentDots(dots);
+            savedPath.MoveUnit();
             Vector2 veolcity = dirVector.normalized * speed * Time.deltaTime;
             veolcity = Vector2.ClampMagnitude(veolcity, dirVector.magnitude);
             transform.Translate(veolcity);
-            dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath[0].GetTilePosition().x, (int)savedPath[0].GetTilePosition().y) - transform.position;
-            ParentDots(newDots);
+            dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath.tilesInPath[0].GetTilePosition().x, (int)savedPath.tilesInPath[0].GetTilePosition().y) - transform.position;
+            //ParentDots(newDots);
             yield return new WaitForSeconds(Time.deltaTime);
         }
         mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(-1);
         
         //if path has one node than after moving you reached target and can clear path
-        if (savedPath.Count == 1)
+        if (savedPath.tilesInPath.Count == 1)
         {
+            savedPath.DeletePath();
             savedPath = null;
-            deleteConstantPath();
         }
     }
 
@@ -223,16 +222,16 @@ public class MovingUnit : GeneralUnit
     }
     void ClonePath()
     {
-        Vector3[] positions = new Vector3[temporaryPath.positionCount];
-        constantPath.positionCount = temporaryPath.positionCount;
-        temporaryPath.GetPositions(positions);
-        constantPath.SetPositions(positions);
-        Transform[] indices = temporaryPath.GetComponentsInChildren<Transform>();
+        Vector3[] positions = new Vector3[currentPath.GetPathPositionCount()];
+        savedPath.SetPathPositionCount(currentPath.GetPathPositionCount());
+        currentPath.renderedPath.GetPositions(positions);
+        savedPath.renderedPath.SetPositions(positions);
+        Transform[] indices = currentPath.renderedPath.GetComponentsInChildren<Transform>();
         foreach (Transform child in indices)
         {
             if (!child.GetComponent<LineRenderer>())
             {
-                child.parent = constantPath.transform;
+                child.parent = savedPath.renderedPath.transform;
             }
         }
     }

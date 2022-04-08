@@ -221,7 +221,7 @@ public class MapCreator : MonoBehaviour
         //inverting the path to the correct order
         currentPath.Reverse();
         //selectedUnit.GetComponent<MovingUnit>().SetCurrentPath()
-        selectedUnit.GetComponent<MovingUnit>().currentPath = currentPath;
+        selectedUnit.GetComponent<MovingUnit>().currentPath.tilesInPath = currentPath;
     }
     public Vector3 hexToWorldCoord(int x, int y)
     {
