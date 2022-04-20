@@ -96,7 +96,7 @@ public class Path
     {
         RemovePathPoints(1);
     }
-    public void DeletePath()
+    public void DeletePath()//delete tiles in path and line renderer 
     {
         foreach (Transform child in renderedPath.transform)
         {
@@ -125,16 +125,50 @@ public class Path
         Transform[] newDots = UnparentDots(dots);
         ParentDots(newDots);
     }
-    //private void MakePathConstant()
-    //{
-    //    constantPath.startColor = Color.black;
-    //    constantPath.endColor = Color.black;
-    //    constantPath.startWidth = 0.03f;
-    //    constantPath.endWidth = 0.03f;
-    //    constantPath.useWorldSpace = true;
-    //    constantPath.material = new Material(Shader.Find("Sprites/Default"));
+    
+    public void GeneratePath()
+    {
 
-    //}
+        renderedPath.positionCount = tilesInPath.Count;//set line renderer length
+        foreach (Transform child in renderedPath.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        int currentNode = 0;
+        while (currentNode < tilesInPath.Count - 1)
+        {
+            Vector3 currentLocation = _map.GetComponent<MapCreator>().hexToWorldCoord((int)tilesInPath[currentNode].GetTilePosition().x, (int)tilesInPath[currentNode].GetTilePosition().y);
+            Vector3 nextLocation = _map.GetComponent<MapCreator>().hexToWorldCoord((int)tilesInPath[currentNode + 1].GetTilePosition().x, (int)tilesInPath[currentNode + 1].GetTilePosition().y);
+            renderedPath.SetPosition(currentNode, currentLocation);
+            renderedPath.SetPosition(currentNode + 1, nextLocation);
+            GameObject dot = GameObject.Instantiate(_dotBetweenStepsPreFab);
+            dot.transform.position = nextLocation;
+            dot.transform.parent = renderedPath.transform;
+            dot.name = parentUnit.transform.name + "_dot_" + currentNode;
+            currentNode++;
+        }
+    }
+    public void SetPathCurrent()
+    {
+        renderedPath.sortingLayerName = "TemporaryPath";
+        renderedPath.startColor = Color.red;
+        renderedPath.endColor = Color.red;
+        renderedPath.startWidth = 0.03f;
+        renderedPath.endWidth = 0.03f;
+        renderedPath.useWorldSpace = true;
+        renderedPath.material = new Material(Shader.Find("Sprites/Default"));
+    }
+    public void SetPathSaved()
+    {
+        renderedPath.startColor = Color.black;
+        renderedPath.endColor = Color.black;
+        renderedPath.startWidth = 0.03f;
+        renderedPath.endWidth = 0.03f;
+        renderedPath.useWorldSpace = true;
+        renderedPath.material = new Material(Shader.Find("Sprites/Default"));
+    }
+
+
     //get and set
     public int GetPathPositionCount()
     {

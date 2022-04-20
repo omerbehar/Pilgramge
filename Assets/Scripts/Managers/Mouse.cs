@@ -106,7 +106,7 @@ public class Mouse : MonoBehaviour
                 if (!clickedUnit.GetComponent<GeneralUnit>().IsMenuOpen()) //if menu is closed - print temp path
                 {
                     map.GetComponent<MapCreator>().GeneratePathTo(hoveredCollider.GetComponent<Tile>(), clickedUnit.GetComponent<GeneralUnit>());
-                    clickedUnit.GetComponent<MovingUnit>().createTemporaryPath();
+                    clickedUnit.GetComponent<MovingUnit>().CreateCurrentPath();
                 }
             }
             else//if not print path then mark hoveret hex
@@ -117,7 +117,7 @@ public class Mouse : MonoBehaviour
         }
         if (clickedUnit == hoveredCollider)  // hovering over the clicked unit causes the temporary path to dissapear
         {
-            hoveredCollider.GetComponent<MovingUnit>().DeleteTemporaryPath();
+            hoveredCollider.GetComponent<MovingUnit>().DeleteCurrentPath();
         }
     }
     void MouseClickedTile(Collider2D clickedTileCollider)//function of clicking tile
@@ -296,7 +296,7 @@ public class Mouse : MonoBehaviour
                 unit.GetComponent<MovingUnit>().CloseMenu();
             }
             clickedUnit = null;
-            unit.GetComponent<MovingUnit>().DeleteTemporaryPath();
+            unit.GetComponent<MovingUnit>().DeleteCurrentPath();
             unit.GetComponent<MovingUnit>().NextMovement();
             unit.GetComponent<MovingUnit>().ResetMovementLeft();
         }

@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MovingUnit : GeneralUnit
@@ -32,7 +30,7 @@ public class MovingUnit : GeneralUnit
         //temporaryPath.transform.parent = transform;
         //constantPath = new GameObject("constantPath").AddComponent<LineRenderer>();
         //constantPath.transform.parent = transform;
-    
+
     }
 
     // Update is called once per frame
@@ -51,6 +49,11 @@ public class MovingUnit : GeneralUnit
         fogOfWarMask.transform.parent = fogOfWarMap.transform;
     }
 
+    public void CreateCurrentPath()
+    {
+        currentPath.SetPathCurrent();
+        currentPath.GeneratePath();
+    }
     //private void DefinePaths()
     //{
     //    if (temporaryPath)
@@ -77,9 +80,9 @@ public class MovingUnit : GeneralUnit
     //public void createTemporaryPath()
     //{
 
-    //    DefinePaths();
-        
-    //    temporaryPath.positionCount = currentPath.Count;
+    //    //DefinePaths();
+
+    //    currentPath.renderedPath.positionCount = currentPath.tilesInPath.Count;//set line renderer length
     //    foreach (Transform child in temporaryPath.transform)
     //    {
     //        GameObject.Destroy(child.gameObject);
@@ -88,7 +91,7 @@ public class MovingUnit : GeneralUnit
     //    while (currentNode < currentPath.Count - 1)
     //    {
     //        Vector3 currentLocation = _map.GetComponent<MapCreator>().hexToWorldCoord((int)currentPath[currentNode].GetTilePosition().x, (int)currentPath[currentNode].GetTilePosition().y);
-    //        Vector3 nextLocation = _map.GetComponent<MapCreator>().hexToWorldCoord((int)currentPath[currentNode+1].GetTilePosition().x, (int)currentPath[currentNode+1].GetTilePosition().y);
+    //        Vector3 nextLocation = _map.GetComponent<MapCreator>().hexToWorldCoord((int)currentPath[currentNode + 1].GetTilePosition().x, (int)currentPath[currentNode + 1].GetTilePosition().y);
     //        temporaryPath.SetPosition(currentNode, currentLocation);
     //        temporaryPath.SetPosition(currentNode + 1, nextLocation);
     //        GameObject dot = Instantiate(dotBetweenStepsPreFab);
@@ -125,7 +128,7 @@ public class MovingUnit : GeneralUnit
     {
         mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(1);
         //smooth movement
-        Vector2 dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath.tilesInPath[0].GetTilePosition().x, (int)savedPath.tilesInPath[0].GetTilePosition().y) - transform.position;   
+        Vector2 dirVector = _map.GetComponent<MapCreator>().hexToWorldCoord((int)savedPath.tilesInPath[0].GetTilePosition().x, (int)savedPath.tilesInPath[0].GetTilePosition().y) - transform.position;
         while (dirVector.magnitude > 0.01)
         {
             //unparent dots so they dont move with the unit
@@ -138,7 +141,7 @@ public class MovingUnit : GeneralUnit
             yield return new WaitForSeconds(Time.deltaTime);
         }
         mouse.GetComponent<Mouse>().UpdateIsNextTurnActive(-1);
-        
+
         //if path has one node than after moving you reached target and can clear path
         if (savedPath.tilesInPath.Count == 1)
         {
@@ -192,25 +195,17 @@ public class MovingUnit : GeneralUnit
         NextMovement(); //moves first step
     }
 
-   
 
-    //public void deleteConstantPath()
-    //{
-    //    foreach (Transform child in constantPath.transform)
-    //    {
-    //        Destroy(child.gameObject);
-    //    }
-    //    constantPath.positionCount = 0;
-    //}
 
-    //public void DeleteTemporaryPath()
-    //{
-    //    foreach (Transform child in temporaryPath.transform)
-    //    {
-    //        Destroy(child.gameObject);
-    //    }
-    //    temporaryPath.positionCount = 0;
-    //}
+    public void DeleteSavedPath()
+    {
+        savedPath.DeletePath();
+    }
+
+    public void DeleteCurrentPath()
+    {
+        currentPath.DeletePath();
+    }
     public void UnSelect()//override unselect + remove temp path
     {
         base.UnSelect();
